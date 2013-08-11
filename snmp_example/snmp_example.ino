@@ -1,5 +1,5 @@
 /**
-USE_GITHUB_USERNAME=pengan1987
+ USE_GITHUB_USERNAME=pengan1987
  * Agentuino SNMP Agent Library Prototyping...
  *
  * Original made 2010 Eric C. Gionet <lavco_eg@hotmail.com>
@@ -30,7 +30,7 @@ static byte subnet[] = { 255, 255, 255, 0 };
 
 //definite a OID for our controler item
 static char sysLight[] PROGMEM = "1.3.6.1.4.1.36582.1.0";
-
+static char sysIpAddr[] PROGMEM = "1.3.6.1.2.1.4.20.1.1";
 //
 // RFC1213 local values
 
@@ -56,12 +56,12 @@ void pduReceived() {
 		//Serial << "OID: " << oid << endl;
 		//
 		if (strcmp_P(oid, sysLight) == 0) {
-			// handle sysDescr (set/get) requests
+			// handle sysLight (set/get) requests
 			if (pdu.type == SNMP_PDU_SET) {
-                              //make a temp pointer to parse pdu value
+				//make a temp pointer to parse pdu value
 				int32_t* tempvalue = &locLight;
 				status = pdu.VALUE.decode(tempvalue);
-			
+
 				pdu.type = SNMP_PDU_RESPONSE;
 				pdu.error = status;
 			} else {
@@ -71,8 +71,22 @@ void pduReceived() {
 				pdu.error = status;
 			}
 			//
+		}else if (strcmp_P(oid, sysIpAddr) == 0){
 
-		} else {
+			 // handle sysDescr (set/get) requests
+			      if ( pdu.type == SNMP_PDU_SET ) {
+			        // response packet from set-request - object is read-only
+			        pdu.type = SNMP_PDU_RESPONSE;
+			        pdu.error = SNMP_ERR_READ_ONLY;
+			      } else {
+			        // response packet from get-request - locDescr
+			        status = pdu.VALUE.encode(SNMP_SYNTAX_IP_ADDRESS, ip);
+			        pdu.type = SNMP_PDU_RESPONSE;
+			        pdu.error = status;
+			      }
+		}
+
+		else {
 			// oid does not exist
 			//
 			// response packet - object not found
@@ -91,7 +105,20 @@ void pduReceived() {
 void setup() {
 	pinMode(9, OUTPUT);
 	Serial.begin(9600);
-	Ethernet.begin(mac, ip);
+	Ethernet.begin(mac);
+	//print local ip address on console
+	  Serial.print("My IP address: ");
+	  for (byte thisByte = 0; thisByte < 4; thisByte++) {
+	    // print the value of each byte of the IP address:
+	    Serial.print(Ethernet.localIP()[thisByte], DEC);
+	    Serial.print(".");
+	    //set local ip variable to real ip address
+	    ip[thisByte]=Ethernet.localIP()[thisByte];
+	  }
+	  Serial.println();
+
+
+
 	//
 	api_status = Agentuino.begin();
 	//
