@@ -20,21 +20,20 @@ static byte ip[] = { 192, 168, 0, 64 };
 static byte gateway[] = { 192, 168, 0, 1 };
 static byte subnet[] = { 255, 255, 255, 0 };
 
-// RFC1213-MIB OIDs
-
-//
-// Arduino defined OIDs
-// .iso.org.dod.internet.private (.1.3.6.1.4)
-// .iso.org.dod.internet.private.enterprises (.1.3.6.1.4.1)
-// .iso.org.dod.internet.private.enterprises.arduino (.1.3.6.1.4.1.36582)
-//
-
 //definite a OID for our controler item
 static char sysLight[] PROGMEM = "1.3.6.1.4.1.36582.1.0";
 static char sysLux2561[] PROGMEM = "1.3.6.1.4.1.36582.2.0";
 static char sysIpAddr[] PROGMEM = "1.3.6.1.2.1.4.20.1.1";
+static char ledLight3[] PROGMEM = "1.3.6.1.4.1.36582.1.3";
+static char ledLight5[] PROGMEM = "1.3.6.1.4.1.36582.1.5";
+static char ledLight6[] PROGMEM = "1.3.6.1.4.1.36582.1.6";
+
 //
 // RFC1213 local values
+
+static int32_t ledLevel3 = 25;
+static int32_t ledLevel5 = 25;
+static int32_t ledLevel6 = 25;
 
 static int32_t locLight = 2;
 
@@ -76,7 +75,55 @@ void pduReceived() {
 				pdu.type = SNMP_PDU_RESPONSE;
 				pdu.error = status;
 			}
-			//
+
+		} else if (strcmp_P(oid, ledLight3) == 0) {
+			// handle sysLight (set/get) requests
+			if (pdu.type == SNMP_PDU_SET) {
+				//make a temp pointer to parse pdu value
+				int32_t* tempvalue = &ledLevel3;
+				status = pdu.VALUE.decode(tempvalue);
+
+				pdu.type = SNMP_PDU_RESPONSE;
+				pdu.error = status;
+			} else {
+
+				status = pdu.VALUE.encode(SNMP_SYNTAX_INT, ledLevel3);
+				pdu.type = SNMP_PDU_RESPONSE;
+				pdu.error = status;
+			}
+
+		} else if (strcmp_P(oid, ledLight5) == 0) {
+			// handle sysLight (set/get) requests
+			if (pdu.type == SNMP_PDU_SET) {
+				//make a temp pointer to parse pdu value
+				int32_t* tempvalue = &ledLevel5;
+				status = pdu.VALUE.decode(tempvalue);
+
+				pdu.type = SNMP_PDU_RESPONSE;
+				pdu.error = status;
+			} else {
+
+				status = pdu.VALUE.encode(SNMP_SYNTAX_INT, ledLevel5);
+				pdu.type = SNMP_PDU_RESPONSE;
+				pdu.error = status;
+			}
+
+		} else if (strcmp_P(oid, ledLight6) == 0) {
+			// handle sysLight (set/get) requests
+			if (pdu.type == SNMP_PDU_SET) {
+				//make a temp pointer to parse pdu value
+				int32_t* tempvalue = &ledLevel6;
+				status = pdu.VALUE.decode(tempvalue);
+
+				pdu.type = SNMP_PDU_RESPONSE;
+				pdu.error = status;
+			} else {
+
+				status = pdu.VALUE.encode(SNMP_SYNTAX_INT, ledLevel6);
+				pdu.type = SNMP_PDU_RESPONSE;
+				pdu.error = status;
+			}
+
 		} else if (strcmp_P(oid, sysIpAddr) == 0) {
 
 			if (pdu.type == SNMP_PDU_SET) {
@@ -123,6 +170,9 @@ void pduReceived() {
 
 void setup() {
 	pinMode(9, OUTPUT);
+	pinMode(3, OUTPUT);
+	pinMode(5, OUTPUT);
+	pinMode(6, OUTPUT);
 	Serial.begin(9600);
 
 	//hardware initialize
@@ -182,6 +232,18 @@ void loop() {
 
 	}
 
+	if (ledLevel3 >= 0 && ledLevel3 <= 255) {
+		analogWrite(3, ledLevel3);
+	}
+
+	if (ledLevel5 >= 0 && ledLevel5 <= 255) {
+		analogWrite(5, ledLevel5);
+	}
+
+	if (ledLevel6 >= 0 && ledLevel6 <= 255) {
+		analogWrite(6, ledLevel6);
+
+	}
 }
 
 int getLux() {
