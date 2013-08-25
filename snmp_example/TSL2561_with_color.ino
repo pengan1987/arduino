@@ -12,13 +12,14 @@
 #include <Agentuino.h>
 #include <Flash.h>
 #include <TSL2561.h>
+#include <Wire.h>
 //
 
 //network properties
 static byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
-static byte ip[] = { 192, 168, 0, 64 };
-static byte gateway[] = { 192, 168, 0, 1 };
-static byte subnet[] = { 255, 255, 255, 0 };
+static byte ip[] = { 0, 0, 0, 0 };
+//static byte gateway[] = { 192, 168, 0, 1 };
+//static byte subnet[] = { 255, 255, 255, 0 };
 
 //definite a OID for our controler item
 static char sysLight[] PROGMEM = "1.3.6.1.4.1.36582.1.0";
@@ -31,12 +32,12 @@ static char ledLight6[] PROGMEM = "1.3.6.1.4.1.36582.1.6";
 //
 // RFC1213 local values
 
-static int32_t ledLevel3 = 25;
-static int32_t ledLevel5 = 25;
-static int32_t ledLevel6 = 25;
+static int16_t ledLevel3 = 25;
+static int16_t ledLevel5 = 25;
+static int16_t ledLevel6 = 25;
 
-static int32_t locLight = 2;
-
+static int16_t locLight = 2;
+int16_t* tempvalue;
 //SNMP resvered variables
 char oid[SNMP_MAX_OID_LEN];
 SNMP_API_STAT_CODES api_status;
@@ -64,7 +65,7 @@ void pduReceived() {
 			// handle sysLight (set/get) requests
 			if (pdu.type == SNMP_PDU_SET) {
 				//make a temp pointer to parse pdu value
-				int32_t* tempvalue = &locLight;
+				tempvalue = &locLight;
 				status = pdu.VALUE.decode(tempvalue);
 
 				pdu.type = SNMP_PDU_RESPONSE;
@@ -80,7 +81,7 @@ void pduReceived() {
 			// handle sysLight (set/get) requests
 			if (pdu.type == SNMP_PDU_SET) {
 				//make a temp pointer to parse pdu value
-				int32_t* tempvalue = &ledLevel3;
+				tempvalue = &ledLevel3;
 				status = pdu.VALUE.decode(tempvalue);
 
 				pdu.type = SNMP_PDU_RESPONSE;
@@ -96,7 +97,7 @@ void pduReceived() {
 			// handle sysLight (set/get) requests
 			if (pdu.type == SNMP_PDU_SET) {
 				//make a temp pointer to parse pdu value
-				int32_t* tempvalue = &ledLevel5;
+				tempvalue = &ledLevel5;
 				status = pdu.VALUE.decode(tempvalue);
 
 				pdu.type = SNMP_PDU_RESPONSE;
@@ -112,7 +113,7 @@ void pduReceived() {
 			// handle sysLight (set/get) requests
 			if (pdu.type == SNMP_PDU_SET) {
 				//make a temp pointer to parse pdu value
-				int32_t* tempvalue = &ledLevel6;
+				tempvalue = &ledLevel6;
 				status = pdu.VALUE.decode(tempvalue);
 
 				pdu.type = SNMP_PDU_RESPONSE;
