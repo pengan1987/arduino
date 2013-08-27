@@ -23,11 +23,13 @@ static char sysIpAddr[] PROGMEM = "1.3.6.1.2.1.4.20.1.1";
 static char ledLight3[] PROGMEM = "1.3.6.1.4.1.36582.1.3";
 static char ledLight5[] PROGMEM = "1.3.6.1.4.1.36582.1.5";
 static char ledLight6[] PROGMEM = "1.3.6.1.4.1.36582.1.6";
+static char ultraSnd[] PROGMEM = "1.3.6.1.4.1.36582.3.1";
 
 static int16_t ledLevel3 = 25;
 static int16_t ledLevel5 = 25;
 static int16_t ledLevel6 = 25;
 static int16_t locLight = 2;
+static int16_t UltraSndSw = 2;
 
 int16_t* tempvalue;
 char oid[SNMP_MAX_OID_LEN];
@@ -95,6 +97,19 @@ void pduReceived() {
 				pdu.error = status;
 			} else {
 				status = pdu.VALUE.encode(SNMP_SYNTAX_INT, ledLevel6);
+				pdu.type = SNMP_PDU_RESPONSE;
+				pdu.error = status;
+			}
+		} else if (strcmp_P(oid, ultraSnd) == 0) {
+
+			if (pdu.type == SNMP_PDU_SET) {
+
+				tempvalue = &UltraSndSw;
+				status = pdu.VALUE.decode(tempvalue);
+				pdu.type = SNMP_PDU_RESPONSE;
+				pdu.error = status;
+			} else {
+				status = pdu.VALUE.encode(SNMP_SYNTAX_INT, UltraSndSw);
 				pdu.type = SNMP_PDU_RESPONSE;
 				pdu.error = status;
 			}
@@ -176,20 +191,27 @@ void loop() {
 	Agentuino.listen();
 	//
 	//
+	if (UltraSndSw ==1)
+	{
+			//pending for ultrasond
+	}
+
+
 	if (locLight == 1) {
 		digitalWrite(9, HIGH);
+		if (ledLevel3 >= 0 && ledLevel3 <= 255) {
+			analogWrite(3, ledLevel3);
+		}
+		if (ledLevel5 >= 0 && ledLevel5 <= 255) {
+			analogWrite(5, ledLevel5);
+		}
+		if (ledLevel6 >= 0 && ledLevel6 <= 255) {
+			analogWrite(6, ledLevel6);
+		}
 	} else if (locLight == 2) {
 		digitalWrite(9, LOW);
 	}
-	if (ledLevel3 >= 0 && ledLevel3 <= 255) {
-		analogWrite(3, ledLevel3);
-	}
-	if (ledLevel5 >= 0 && ledLevel5 <= 255) {
-		analogWrite(5, ledLevel5);
-	}
-	if (ledLevel6 >= 0 && ledLevel6 <= 255) {
-		analogWrite(6, ledLevel6);
-	}
+
 }
 int getLux() {
 	uint16_t x = tsl.getLuminosity(TSL2561_VISIBLE);
