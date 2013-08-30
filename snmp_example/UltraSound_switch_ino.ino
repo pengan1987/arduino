@@ -1,7 +1,7 @@
 const int anPin = 1;
 long anVolt, inches, cm;
 int last=0;//Create sum variable so it can be averaged
-int avgrange=30;//Quantity of values to average (sample size)
+int avgrange=10;//Quantity of values to average (sample size)
 int sum=0;
 int comingCount = 0;
 int leavingCount =0;
