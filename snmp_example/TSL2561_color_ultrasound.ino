@@ -210,6 +210,9 @@ void loop() {
 		}
 	} else if (locLight == 2) {
 		digitalWrite(9, LOW);
+		analogWrite(3, 0);
+		analogWrite(5, 0);
+		analogWrite(6, 0);
 	}
 
 }
@@ -221,7 +224,7 @@ int getLux() {
 	lum = tsl.getFullLuminosity();
 	ir = lum >> 16;
 	full = lum & 0xFFFF;
-	Serial.print("IR: ");
+	/*Serial.print("IR: ");
 	Serial.print(ir);
 	Serial.print("\t\t");
 	Serial.print("Full: ");
@@ -230,7 +233,7 @@ int getLux() {
 	Serial.print("Visible: ");
 	Serial.print(full - ir);
 	Serial.print("\t");
-	Serial.print("Lux: ");
+	Serial.print("Lux: ");*/
 	int lux = tsl.calculateLux(full, ir);
 	Serial.println(lux);
 	return lux;
