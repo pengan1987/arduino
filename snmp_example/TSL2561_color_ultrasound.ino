@@ -29,7 +29,7 @@ static int16_t ledLevel3 = 25;
 static int16_t ledLevel5 = 25;
 static int16_t ledLevel6 = 25;
 static int16_t locLight = 2;
-static int16_t UltraSndSw = 2;
+static int16_t UltraSnd = 0;
 
 int16_t* tempvalue;
 char oid[SNMP_MAX_OID_LEN];
@@ -104,12 +104,11 @@ void pduReceived() {
 
 			if (pdu.type == SNMP_PDU_SET) {
 
-				tempvalue = &UltraSndSw;
-				status = pdu.VALUE.decode(tempvalue);
 				pdu.type = SNMP_PDU_RESPONSE;
-				pdu.error = status;
+				pdu.error = SNMP_ERR_READ_ONLY;
 			} else {
-				status = pdu.VALUE.encode(SNMP_SYNTAX_INT, UltraSndSw);
+				UltraSnd = analogRead(1);
+				status = pdu.VALUE.encode(SNMP_SYNTAX_INT, UltraSnd);
 				pdu.type = SNMP_PDU_RESPONSE;
 				pdu.error = status;
 			}
@@ -190,12 +189,6 @@ void loop() {
 	// listen/handle for incoming SNMP requests
 	Agentuino.listen();
 	//
-	//
-	if (UltraSndSw ==1)
-	{
-			//pending for ultrasond
-	}
-
 
 	if (locLight == 1) {
 		digitalWrite(9, HIGH);
@@ -224,16 +217,7 @@ int getLux() {
 	lum = tsl.getFullLuminosity();
 	ir = lum >> 16;
 	full = lum & 0xFFFF;
-	/*Serial.print("IR: ");
-	Serial.print(ir);
-	Serial.print("\t\t");
-	Serial.print("Full: ");
-	Serial.print(full);
-	Serial.print("\t");
-	Serial.print("Visible: ");
-	Serial.print(full - ir);
-	Serial.print("\t");
-	Serial.print("Lux: ");*/
+
 	int lux = tsl.calculateLux(full, ir);
 	Serial.println(lux);
 	return lux;
